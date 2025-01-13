@@ -15,12 +15,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.pokergameui.ui.theme.PokerGameUITheme
+import com.example.pokergameui.viewmodel.StartViewModel
 
 class StartActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
         setContent {
             PokerGameUITheme {
                 NavigationHost(onOrientationChange = { isLandscape ->
@@ -32,6 +32,13 @@ class StartActivity : ComponentActivity() {
                 })
             }
         }
+
+        StartViewModel().initConnection()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        StartViewModel().disconnect()
     }
 }
 

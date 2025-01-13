@@ -27,7 +27,6 @@
 
         <activity
             android:name=".view.InGameActivity"
-            android:screenOrientation="userLandscape"
             android:exported="true"
             android:theme="@style/Theme.PokerGameUI"
             >

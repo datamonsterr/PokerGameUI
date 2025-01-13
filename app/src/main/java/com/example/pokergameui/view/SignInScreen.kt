@@ -40,19 +40,8 @@ import androidx.compose.ui.unit.sp
 import com.example.pokergameui.ui.theme.Blue
 import com.example.pokergameui.ui.theme.Dark
 import com.example.pokergameui.ui.theme.InputLabel
-import com.example.pokergameui.viewmodel.SigninViewModel
+import com.example.pokergameui.viewmodel.StartViewModel
 
-fun handleSignIn(context: Context, username: String, password: String) {
-    if (username.isEmpty() || password.isEmpty()) {
-        Log.d("SignInScreen", "Username or password is empty")
-        return
-    }
-
-    SigninViewModel().signIn(username, password)
-
-    val intent = Intent(context, LobbyActivity::class.java)
-    context.startActivity(intent)
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,7 +67,7 @@ fun SignInScreen(onBackPressed: () -> Unit) {
         ) {
             SignInHeader()
             Spacer(modifier = Modifier.height(24.dp))
-            SignInForm(modifier = Modifier.fillMaxWidth(), handleSignIn = ::handleSignIn)
+            SignInForm(modifier = Modifier.fillMaxWidth())
         }
     }
 }
@@ -127,7 +116,6 @@ fun SignInHeader(modifier: Modifier = Modifier) {
 @Composable
 fun SignInForm(
     modifier: Modifier = Modifier,
-    handleSignIn: (Context, String, String) -> Unit = { _, _, _ -> },
     handleForgetPassWord: () -> Unit = {}
 ) {
     var username by remember { mutableStateOf(TextFieldValue("")) }
@@ -157,7 +145,7 @@ fun SignInForm(
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             colors = ButtonDefaults.buttonColors(containerColor = Blue),
-            onClick = { handleSignIn(context, username.text, password.text) },
+            onClick = { StartViewModel().signIn(context, username.text, password.text) },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(

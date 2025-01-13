@@ -8,11 +8,13 @@ import java.nio.ByteOrder
 data class Header(val packetLen: Short, val protocolVer: Byte, val packetType: Short)
 data class Packet<T>(val header: Header = Header(0, 0, 0), val payload: T? = null)
 data class LoginRequest(val user: String, val pass: String)
+data class TableListRequest()
 data class BaseResponse(val res : Int)
 
 class Protocol {
     companion object {
         const val LOGIN = 100
+        const val TABLE_LIST = 500
         const val SIGNUP = 200
 
         inline fun <reified T> encode(
@@ -20,6 +22,7 @@ class Protocol {
             packetType: Int,
             payload: T
         ): ByteArray? {
+            val tag = "Protocol.encode"
             return try {
                 val pVer = protocolVersion.toByte()
                 val pType = packetType.toShort()
@@ -30,14 +33,16 @@ class Protocol {
                 buffer.put(pVer)
                 buffer.putShort(pType)
                 buffer.put(packed)
+                Log.d(tag, "Encoded packet: ${buffer.array().contentToString()}")
                 buffer.array()
             } catch (e: Exception) {
-                Log.e("Protocol", "Encode error: ${e.localizedMessage}")
+                Log.e(tag, "Encode error: ${e.localizedMessage}")
                 null
             }
         }
 
         inline fun <reified T> decode(data: ByteArray): Packet<T> {
+            val tag = "Protocol.decode"
             return try {
                 val buffer = ByteBuffer.wrap(data).order(ByteOrder.BIG_ENDIAN)
                 val packetLen = buffer.getShort()
@@ -45,9 +50,10 @@ class Protocol {
                 val packetType = buffer.getShort()
                 // get the payload by skipping the header = 5 bytes
                 val payload = MoshiPack.unpack<T>(data.copyOfRange(5, data.size))
+                Log.d(tag, "Decoded packet: $packetLen, $protocolVer, $packetType, $payload")
                 Packet(Header(packetLen, protocolVer, packetType), payload)
             } catch (e: Exception) {
-                Log.e("Protocol", "Decode error: ${e.localizedMessage}")
+                Log.e(tag, "Decode error: ${e.localizedMessage}")
                 Packet()
             }
         }
