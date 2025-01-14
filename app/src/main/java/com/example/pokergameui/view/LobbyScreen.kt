@@ -35,13 +35,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.pokergameui.model.PokerTable
+import com.example.pokergameui.viewmodel.MyViewModels
+import com.example.pokergameui.viewmodel.User
 
 @Composable
 fun LobbyScreen(
     navController: NavController,
     onCreateTableClicked: () -> Unit,
     onJoinTableClicked: () -> Unit,
-    onClickGameRule: () -> Unit
+    onClickGameRule: () -> Unit,
+    user: User
 ) {
     Column(
         modifier = Modifier
@@ -50,7 +54,7 @@ fun LobbyScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        AvatarSection(chipBalance = 1000)
+        AvatarSection(user)
         Spacer(modifier = Modifier.height(16.dp))
         Row {
             Button(
@@ -127,7 +131,7 @@ fun CreateTableScreen(onCreateTable: (String, Int, Int) -> Unit) {
 
 @Composable
 fun JoinTableScreen(navController: NavController) {
-    val tables = remember { generateDummyTables() }
+    MyViewModels.lobbyViewModel.getTableList()
 
     Column(
         modifier = Modifier
@@ -137,7 +141,7 @@ fun JoinTableScreen(navController: NavController) {
         horizontalAlignment = Alignment.Start
     ) {
         Spacer(modifier = Modifier.height(16.dp))
-        PokerTableList(tables)
+        PokerTableList(MyViewModels.lobbyViewModel.tables?: emptyList())
     }
 }
 
@@ -181,15 +185,6 @@ fun PokerTableItem(table: PokerTable) {
     }
 }
 
-fun generateDummyTables(): List<PokerTable> {
-    return listOf(
-        PokerTable("Table 1", 3, 6, 50),
-        PokerTable("Table 2", 5, 8, 100),
-        PokerTable("Table 3", 2, 4, 25),
-        PokerTable("Table 4", 6, 6, 200),
-        PokerTable("Table 5", 1, 4, 10)
-    )
-}
 
 @Composable
 fun FriendListScreen(navController: NavController) {
@@ -296,7 +291,7 @@ fun ScoreboardScreen(navController: NavController) {
 }
 
 @Composable
-fun AvatarSection(chipBalance: Int) {
+fun AvatarSection(user: User) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -316,13 +311,13 @@ fun AvatarSection(chipBalance: Int) {
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(
-                    text = "Player Name",
+                    text = "${user.username}",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Chip Balance: $chipBalance",
+                    text = "Balance: ${user.balance?.toString()}",
                     fontSize = 16.sp,
                     color = Color(0xFF00796B)
                 )

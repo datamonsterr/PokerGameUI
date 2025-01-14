@@ -3,19 +3,22 @@ package com.example.pokergameui.viewmodel
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pokergameui.model.BaseResponse
 import com.example.pokergameui.model.LoginRequest
+import com.example.pokergameui.model.LoginResponse
 import com.example.pokergameui.model.Protocol
 import com.example.pokergameui.model.TCPConnectionManager
 import com.example.pokergameui.view.LobbyActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class StartViewModel : ViewModel() {
     private val tag = "StartViewModel"
-    private val host = "192.168.1.20"
+    private val host = "192.168.1.17"
     private val port = 8080
 
     fun initConnection() {
@@ -58,19 +61,64 @@ class StartViewModel : ViewModel() {
                 return@launch
             }
 
-            val response = TCPConnectionManager.receive() ?: return@launch
-            val status = Protocol.decode<BaseResponse>(response)
-            if (status.header.packetLen == 0.toShort()) {
-                Log.e("handle-signin", "receive failed")
-                return@launch
-            }
 
-            if (status.payload?.res == Protocol.LOGIN + 1) {
-                Log.d("handle-signin", "login success")
-                val intent = Intent(context, LobbyActivity::class.java)
-                context.startActivity(intent)
-            } else {
-                Log.e("handle-signin", "login failed")
+            val response = TCPConnectionManager.receive() ?: return@launch
+            try {
+                val status = Protocol.decode<LoginResponse>(response)
+                if (status.header.packetLen == 0.toShort()) {
+                    Log.e("handle-signin", "receive failed")
+                    Toast.makeText(context, "Failed to receive data", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+
+                MyViewModels.lobbyViewModel.user = User(
+                    status.payload?.userId ?: 0,
+                    status.payload?.username ?: "",
+                    status.payload?.balance ?: 0,
+                    status.payload?.fullname ?: "",
+                    status.payload?.email ?: "",
+                    status.payload?.phone ?: "",
+                    status.payload?.dob ?: "",
+                    status.payload?.country ?: ""
+                )
+                withContext(Dispatchers.Main) {
+                    if (status.payload?.res == Protocol.LOGIN + 1) {
+                        Log.d("handle-signin", "login success")
+                        try {
+                            Toast.makeText(context, "Login sucess", Toast.LENGTH_SHORT).show()
+                            val intent = Intent(context, LobbyActivity::class.java)
+                            context.startActivity(intent)
+                        } catch (e: Exception) {
+                            Log.e("handle-signin", "error toast: ${e.localizedMessage}")
+                        }
+                    } else {
+                        Log.e("handle-signin", "login failed")
+                        try {
+                            Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
+                        } catch (e: Exception) {
+                            Log.e("handle-signin", "error toast: ${e.localizedMessage}")
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                val status = Protocol.decode<BaseResponse>(response)
+                if (status.header.packetLen == 0.toShort()) {
+                    Log.e("handle-signin", "receive failed")
+                    Toast.makeText(context, "Failed to receive data", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+
+                withContext(Dispatchers.Main) {
+                    if (status.payload?.res == Protocol.LOGIN + 2) {
+                        Log.e("handle-signin", "login failed")
+                        try {
+                            Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
+                        } catch (e: Exception) {
+                            Log.e("handle-signin", "error toast: ${e.localizedMessage}")
+                        }
+                    }
+                }
+                return@launch
             }
         }
     }

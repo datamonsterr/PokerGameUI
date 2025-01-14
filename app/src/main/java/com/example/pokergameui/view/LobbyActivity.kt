@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,32 +30,35 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-
-
-data class PokerTable(
-    val tableName: String,
-    val currentPlayer: Int,
-    val maxPlayer: Int,
-    val minBet: Int
-)
+import com.example.pokergameui.viewmodel.LobbyViewModel
+import com.example.pokergameui.viewmodel.MyViewModels
+import com.example.pokergameui.viewmodel.User
 
 class LobbyActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val user = MyViewModels.lobbyViewModel.user
+        if (user == null) {
+            startActivity(Intent(this, StartActivity::class.java))
+            finish()
+            return
+        }
+
         setContent {
-            PokerGameApp()
+            PokerGameApp(user)
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PokerGameApp() {
+fun PokerGameApp(user: User) {
     val navController = rememberNavController()
     Scaffold(
         topBar = {
@@ -71,7 +75,7 @@ fun PokerGameApp() {
             startDestination = "lobby",
             modifier = Modifier.padding(padding)
         ) {
-            addLobbyScreen(navController)
+            addLobbyScreen(navController, user)
             addCreateTableScreen(navController)
             addJoinTableScreen(navController)
             addScoreboardScreen(navController)
@@ -79,7 +83,7 @@ fun PokerGameApp() {
     }
 }
 
-fun NavGraphBuilder.addLobbyScreen(navController: NavController) {
+fun NavGraphBuilder.addLobbyScreen(navController: NavController, user: User) {
     composable("lobby") {
         LobbyScreen(
             navController = navController,
@@ -93,12 +97,17 @@ fun NavGraphBuilder.addLobbyScreen(navController: NavController) {
                         Uri.parse(youtubeUrl)
                     )
                 )
-            }
+            }, user = user
         )
     }
 }
 
 fun NavGraphBuilder.addCreateTableScreen(navController: NavController) {
+    fun handleCreateTable(tableName: String, numberOfPlayers: Int, minBet: Int) {
+        val context = navController.context
+        MyViewModels.lobbyViewModel.createTable(context, tableName, numberOfPlayers, minBet)
+    }
+
     composable("create_table") {
         CreateTableScreen(
             onCreateTable = { tableName, numberOfPlayers, minBet ->
@@ -106,6 +115,9 @@ fun NavGraphBuilder.addCreateTableScreen(navController: NavController) {
                     "CreateTable",
                     "Table: $tableName, Players: $numberOfPlayers, Min Bet: $minBet"
                 )
+
+                handleCreateTable(tableName, numberOfPlayers, minBet)
+
                 navController.navigate("lobby")
             }
         )

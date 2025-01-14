@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -15,9 +16,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.pokergameui.ui.theme.PokerGameUITheme
-import com.example.pokergameui.viewmodel.StartViewModel
+import com.example.pokergameui.viewmodel.MyViewModels
 
 class StartActivity : ComponentActivity() {
+    fun handleSignIn(username: String, password: String) {
+        MyViewModels.startViewModel.signIn(this, username, password)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -29,22 +34,23 @@ class StartActivity : ComponentActivity() {
                     } else {
                         ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                     }
-                })
+                }, ::handleSignIn)
             }
         }
 
-        StartViewModel().initConnection()
+        MyViewModels.startViewModel.initConnection()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        StartViewModel().disconnect()
+        MyViewModels.startViewModel.disconnect()
     }
 }
 
 
+
 @Composable
-fun NavigationHost(onOrientationChange: (Boolean) -> Unit) {
+fun NavigationHost(onOrientationChange: (Boolean) -> Unit, handleSignIn: (String, String) -> Unit) {
     val navController = rememberNavController()
 
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -72,7 +78,7 @@ fun NavigationHost(onOrientationChange: (Boolean) -> Unit) {
                 LaunchedEffect(Unit) {
                     onOrientationChange(false)
                 }
-                SignInScreen(onBackPressed = { navController.popBackStack() })
+                SignInScreen(onBackPressed = { navController.popBackStack() }, handleSignIn = handleSignIn)
             }
             composable("signup_screen") {
                 LaunchedEffect(Unit) {

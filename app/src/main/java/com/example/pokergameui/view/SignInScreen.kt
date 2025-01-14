@@ -40,12 +40,13 @@ import androidx.compose.ui.unit.sp
 import com.example.pokergameui.ui.theme.Blue
 import com.example.pokergameui.ui.theme.Dark
 import com.example.pokergameui.ui.theme.InputLabel
+import com.example.pokergameui.viewmodel.LobbyViewModel
 import com.example.pokergameui.viewmodel.StartViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignInScreen(onBackPressed: () -> Unit) {
+fun SignInScreen(onBackPressed: () -> Unit, handleSignIn: (String, String) -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -67,7 +68,9 @@ fun SignInScreen(onBackPressed: () -> Unit) {
         ) {
             SignInHeader()
             Spacer(modifier = Modifier.height(24.dp))
-            SignInForm(modifier = Modifier.fillMaxWidth())
+            SignInForm(modifier = Modifier.fillMaxWidth(),
+                handleSignIn = handleSignIn,
+            )
         }
     }
 }
@@ -116,11 +119,11 @@ fun SignInHeader(modifier: Modifier = Modifier) {
 @Composable
 fun SignInForm(
     modifier: Modifier = Modifier,
+    handleSignIn : (String, String) -> Unit,
     handleForgetPassWord: () -> Unit = {}
 ) {
     var username by remember { mutableStateOf(TextFieldValue("")) }
     var password by remember { mutableStateOf(TextFieldValue("")) }
-    val context = LocalContext.current
 
     Column(
         modifier = modifier
@@ -145,7 +148,7 @@ fun SignInForm(
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             colors = ButtonDefaults.buttonColors(containerColor = Blue),
-            onClick = { StartViewModel().signIn(context, username.text, password.text) },
+            onClick = {handleSignIn(username.text, password.text)},
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
