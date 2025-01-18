@@ -132,7 +132,12 @@ fun NavGraphBuilder.addJoinTableScreen(navController: NavController) {
 
 fun NavGraphBuilder.addScoreboardScreen(navController: NavController) {
     composable("scoreboard") {
-        ScoreboardScreen(navController)
+        val scoreboard = MyViewModels.lobbyViewModel.scoreboard
+        if (scoreboard == null) {
+            MyViewModels.lobbyViewModel.getScoreboard()
+            return@composable
+        }
+        ScoreboardScreen(navController, scoreboard)
     }
 }
 

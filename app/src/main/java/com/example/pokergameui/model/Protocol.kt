@@ -14,6 +14,7 @@ data class CreateTableRequest(
     val maxPlayer: Byte,
     val minBet: Int
 )
+
 data class BaseResponse(val res : Int)
 data class LoginResponse(
     val res : Int,
@@ -37,18 +38,53 @@ data class PokerTable(
 )
 data class TableListResponse(val size: Int, val tables: List<PokerTable>)
 
+data class UserScore(
+    val rank: Int,
+    val id: Int,
+    val balance: Int
+)
+
+data class ScoreboardResponse(
+    val users: List<UserScore>
+)
+
 class Protocol {
     companion object {
         const val LOGIN = 100
         const val LOGIN_OK = 101
         const val LOGIN_NOT_OK = 102
-        const val TABLE_LIST = 500
-        const val TABLE_LIST_OK = 501
-        const val TABLE_LIST_NOT_OK = 502
+
+        const val SIGNUP = 200
+        const val SIGNUP_OK = 201
+        const val SIGNUP_NOT_OK = 202
+
         const val CREATE_TABLE = 300
         const val CREATE_TABLE_OK = 301
         const val CREATE_TABLE_NOT_OK = 302
-        const val SIGNUP = 200
+
+        const val JOIN_TABLE = 400
+        const val JOIN_TABLE_OK = 401
+        const val JOIN_TABLE_NOT_OK = 402
+
+        const val TABLE_LIST = 500
+        const val TABLE_LIST_OK = 501
+        const val TABLE_LIST_NOT_OK = 502
+
+        const val UPDATE_GAMESTATE = 600
+        const val UPDATE_GAMESTATE_OK = 601
+        const val UPDATE_GAMESTATE_NOT_OK = 602
+
+        const val LEAVE_TABLE = 700
+        const val LEAVE_TABLE_OK = 701
+        const val LEAVE_TABLE_NOT_OK = 702
+
+        const val SCOREBOARD = 800
+        const val SCOREBOARD_OK = 801
+        const val SCOREBOARD_NOT_OK = 802
+
+        const val FRIEND_LIST = 900
+        const val FRIEND_LIST_OK = 901
+        const val FRIEND_LIST_NOT_OK = 902
 
         inline fun <reified T> encode(
             protocolVersion: Int,

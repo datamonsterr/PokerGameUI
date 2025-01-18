@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.pokergameui.model.PokerTable
+import com.example.pokergameui.model.UserScore
 import com.example.pokergameui.viewmodel.MyViewModels
 import com.example.pokergameui.viewmodel.User
 
@@ -264,7 +265,7 @@ fun PlaySection(
 }
 
 @Composable
-fun ScoreboardScreen(navController: NavController) {
+fun ScoreboardScreen(navController: NavController, scoreboard : List<UserScore>) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -277,13 +278,14 @@ fun ScoreboardScreen(navController: NavController) {
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(8.dp))
-        repeat(3) {
+
+        for (score in scoreboard) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = "Player ${it + 1}")
-                Text(text = "${(it + 1) * 1000} Chips")
+                Text(text = "${score.id}")
+                Text(text = "${score.balance}")
             }
             Spacer(modifier = Modifier.height(8.dp))
         }

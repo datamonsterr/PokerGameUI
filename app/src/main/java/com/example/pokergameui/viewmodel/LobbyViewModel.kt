@@ -10,8 +10,10 @@ import com.example.pokergameui.model.BaseResponse
 import com.example.pokergameui.model.CreateTableRequest
 import com.example.pokergameui.model.PokerTable
 import com.example.pokergameui.model.Protocol
+import com.example.pokergameui.model.ScoreboardResponse
 import com.example.pokergameui.model.TCPConnectionManager
 import com.example.pokergameui.model.TableListResponse
+import com.example.pokergameui.model.UserScore
 import com.example.pokergameui.view.InGameActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -33,6 +35,7 @@ class LobbyViewModel : ViewModel() {
 
     var tables: List<PokerTable>? = null
     var user: User? = null
+    var scoreboard: List<UserScore>? = null
 
     fun createTable(context: Context, tableName: String, maxPlayers: Int, minBet: Int) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -177,6 +180,41 @@ class LobbyViewModel : ViewModel() {
 
     fun showFriendList() {
         viewModelScope.launch(Dispatchers.IO) {
+        }
+    }
+
+    fun leaveTable() {
+        viewModelScope.launch(Dispatchers.IO) {
+        }
+    }
+
+    fun getScoreboard() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val msg = Protocol.encode<Any>(1, Protocol.SCOREBOARD, null)
+
+            if (msg == null) {
+                Log.d(tag, "Failed to encode message")
+                return@launch
+            }
+
+            val status = TCPConnectionManager.send(msg)
+
+            if (!status) {
+                Log.d(tag, "Failed to send message")
+                return@launch
+            }
+
+            val resp = TCPConnectionManager.receive()
+
+            if (resp == null) {
+                Log.d(tag, "Failed to receive message")
+                return@launch
+            }
+
+            val respMsg = Protocol.decode<ScoreboardResponse>(resp)
+            val scb = respMsg.payload as List<UserScore>
+
+            MyViewModels.lobbyViewModel.scoreboard = scb
         }
     }
 }
