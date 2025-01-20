@@ -38,7 +38,7 @@ class StartActivity : ComponentActivity() {
             }
         }
 
-        MyViewModels.startViewModel.initConnection()
+        MyViewModels.startViewModel.initConnection(this)
     }
 
     override fun onDestroy() {

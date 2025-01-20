@@ -15,9 +15,10 @@ data class CreateTableRequest(
     val minBet: Int
 )
 
-data class BaseResponse(val res : Int)
+data class BaseResponse(val res : Short)
+
 data class LoginResponse(
-    val res : Int,
+    val res : Short,
     val userId : Int,
     val username : String,
     val balance : Int,
@@ -47,6 +48,8 @@ data class UserScore(
 data class ScoreboardResponse(
     val users: List<UserScore>
 )
+
+data class JoinTableRequest(val tableId: Int)
 
 class Protocol {
     companion object {

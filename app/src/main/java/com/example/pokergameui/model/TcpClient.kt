@@ -6,6 +6,7 @@ import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.net.InetSocketAddress
 import java.net.Socket
 import java.net.SocketException
 
@@ -19,7 +20,8 @@ class TCPClient(private val host: String, private val port: Int) {
         return withContext(Dispatchers.IO) {
             try {
                 Log.d("TCPClient", "Attempting to connect to $host:$port")
-                socket = Socket(host, port)
+                socket = Socket()
+                socket?.connect(InetSocketAddress(host, port), 5000)
                 outputStream = socket?.getOutputStream()
                 inputStream = socket?.getInputStream()
                 Log.d("TCPClient", "Connected to $host:$port")

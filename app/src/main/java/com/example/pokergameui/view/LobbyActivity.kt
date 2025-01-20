@@ -63,7 +63,14 @@ fun PokerGameApp(user: User) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Poker Game", color = Color.White) },
+                title = {
+                    Text(
+                        text = "Poker Game",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = Color(0xFF00796B)
                 )

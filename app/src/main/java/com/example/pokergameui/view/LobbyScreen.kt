@@ -1,6 +1,5 @@
 package com.example.pokergameui.view
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +18,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -132,7 +133,8 @@ fun CreateTableScreen(onCreateTable: (String, Int, Int) -> Unit) {
 
 @Composable
 fun JoinTableScreen(navController: NavController) {
-    MyViewModels.lobbyViewModel.getTableList()
+    val tableList = MyViewModels.lobbyViewModel.tables
+    val isLoadingTable = MyViewModels.lobbyViewModel.isLoadingTable
 
     Column(
         modifier = Modifier
@@ -141,8 +143,18 @@ fun JoinTableScreen(navController: NavController) {
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
+        Button(
+            onClick = { MyViewModels.lobbyViewModel.getTableList() },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00796B))
+        ) {
+            Text("Refresh", color = Color.White)
+        }
         Spacer(modifier = Modifier.height(16.dp))
-        PokerTableList(MyViewModels.lobbyViewModel.tables?: emptyList())
+        if (isLoadingTable) {
+            CircularProgressIndicator()
+        } else {
+            PokerTableList(tableList.value)
+        }
     }
 }
 
@@ -162,15 +174,14 @@ fun PokerTableList(tables: List<PokerTable>) {
 
 @Composable
 fun PokerTableItem(table: PokerTable) {
+    val context = LocalContext.current
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
             .clickable {
-                Log.d(
-                    "PokerTableClick",
-                    "Clicked on Table: ${table.tableName}, Players: ${table.currentPlayer}/${table.maxPlayer}, Min Bet: ${table.minBet}"
-                )
+                MyViewModels.lobbyViewModel.joinTable(context, table.id)
             },
         colors = CardDefaults.cardColors(containerColor = Color(0xFFE0F2F1))
     ) {

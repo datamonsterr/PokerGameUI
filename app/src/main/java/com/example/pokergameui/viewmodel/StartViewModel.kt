@@ -18,10 +18,10 @@ import kotlinx.coroutines.withContext
 
 class StartViewModel : ViewModel() {
     private val tag = "StartViewModel"
-    private val host = "192.168.1.17"
+    private val host = "192.168.1.16"
     private val port = 8080
 
-    fun initConnection() {
+    fun initConnection(context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 Log.d(tag, "initConnection called")
@@ -29,9 +29,28 @@ class StartViewModel : ViewModel() {
                 Log.d(tag, "initConnection get result $isConnected")
                 if (isConnected) {
                     Log.d(tag, "Connection successful")
+                } else {
+                    Log.e(tag, "Failed to connect to server")
+                    withContext(Dispatchers.Main) {
+                        try {
+                            Toast.makeText(context, "Failed to connect to server", Toast.LENGTH_SHORT)
+                                .show()
+                        } catch (e: Exception) {
+
+                            Log.e(tag, "Failed to show toast: ${e.localizedMessage}")
+                        }
+                    }
                 }
             } catch (e: Exception) {
                 Log.e(tag, "Error: ${e.localizedMessage}")
+                withContext(Dispatchers.Main) {
+                    try {
+                        Toast.makeText(context, "Failed to connect to server", Toast.LENGTH_SHORT)
+                            .show()
+                    } catch (e: Exception) {
+                        Log.e(tag, "Failed to show toast: ${e.localizedMessage}")
+                    }
+                }
             }
         }
     }
@@ -81,8 +100,9 @@ class StartViewModel : ViewModel() {
                     status.payload?.dob ?: "",
                     status.payload?.country ?: ""
                 )
+
                 withContext(Dispatchers.Main) {
-                    if (status.payload?.res == Protocol.LOGIN + 1) {
+                    if (status.payload?.res?.toInt() == Protocol.LOGIN + 1) {
                         Log.d("handle-signin", "login success")
                         try {
                             Toast.makeText(context, "Login sucess", Toast.LENGTH_SHORT).show()
@@ -109,7 +129,7 @@ class StartViewModel : ViewModel() {
                 }
 
                 withContext(Dispatchers.Main) {
-                    if (status.payload?.res == Protocol.LOGIN + 2) {
+                    if (status.payload?.res?.toInt() == Protocol.LOGIN + 2){
                         Log.e("handle-signin", "login failed")
                         try {
                             Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
